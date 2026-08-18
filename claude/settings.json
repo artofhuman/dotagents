@@ -1,0 +1,21 @@
+{
+  "model": "opus",
+  "enabledPlugins": {
+    "pyright-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": true,
+    "simple-english@simple-english": true
+  },
+  "extraKnownMarketplaces": {
+    "simple-english": {
+      "source": {
+        "source": "github",
+        "repo": "AminBlg/SimpleEnglish"
+      }
+    }
+  },
+  "syntaxHighlightingDisabled": false,
+  "effortLevel": "high",
+  "tui": "default",
+  "theme": "light",
+  "autoCompactEnabled": false
+}
