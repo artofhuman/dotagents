@@ -1,7 +1,6 @@
 #!/bin/sh
 # Status line script for Claude Code (settings.json -> statusLine.command).
 # Shows: model[effort] | directory | vcs change/branch | context usage | 5h limit.
-# Port of pi-extensions/status-line.ts.
 
 input=$(cat)
 
@@ -27,7 +26,7 @@ if [ -z "$vcs" ]; then
   [ -n "$branch" ] && vcs="git:$branch"
 fi
 
-# Context usage and 5h rate limit as 10-cell bars. Built in jq: bash 3.2
+# Context usage and 5h rate limit (with local reset time) as 10-cell bars. Built in jq: bash 3.2
 # (/bin/sh) mangles multibyte literals appended in a loop.
 usage=$(printf '%s' "$input" | jq -r '
   def bar($p):
@@ -35,7 +34,9 @@ usage=$(printf '%s' "$input" | jq -r '
     | (if $p > 0 and $raw < 1 then 1 elif $raw > 10 then 10 else $raw end) as $f
     | (("\u25a0" * $f) // "") + (("\u25a1" * (10 - $f)) // "");
   [ (.context_window.used_percentage // empty | floor | "ctx:\(bar(.)) \(.)%"),
-    (.rate_limits.five_hour.used_percentage // empty | floor | "5h:\(bar(.)) \(.)%")
+    (.rate_limits.five_hour // empty | select(.used_percentage != null)
+     | "5h:\(bar(.used_percentage)) \(.used_percentage | floor)%"
+       + (if .resets_at then " until \(.resets_at | strflocaltime("%H:%M"))" else "" end))
   ] | join(" | ")')
 
 out="$model | $dir"
