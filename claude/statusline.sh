@@ -33,9 +33,9 @@ usage=$(printf '%s' "$input" | jq -r '
     (($p * 10 / 100) | floor) as $raw
     | (if $p > 0 and $raw < 1 then 1 elif $raw > 10 then 10 else $raw end) as $f
     | (("\u25a0" * $f) // "") + (("\u25a1" * (10 - $f)) // "");
-  [ (.context_window.used_percentage // empty | floor | "ctx:\(bar(.)) \(.)%"),
+  [ (.context_window.used_percentage // empty | floor | "ctx: \(bar(.)) \(.)%"),
     (.rate_limits.five_hour // empty | select(.used_percentage != null)
-     | "5h:\(bar(.used_percentage)) \(.used_percentage | floor)%"
+     | "5h: \(bar(.used_percentage)) \(.used_percentage | floor)%"
        + (if .resets_at then " until \(.resets_at | strflocaltime("%H:%M"))" else "" end))
   ] | join(" | ")')
 

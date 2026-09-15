@@ -1,6 +1,6 @@
 {
-  "lastChangelogVersion": "0.84.2",
+  "lastChangelogVersion": "0.85.1",
   "theme": "light",
   "defaultProvider": "kontur",
-  "defaultModel": "code-pro"
+  "defaultModel": "ultra"
 }
