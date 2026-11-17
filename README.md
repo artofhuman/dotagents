@@ -13,7 +13,9 @@
 
 # Skills
 
-Skills live in `skills/`. Add a new skill as a folder there, no extra links needed.
+Own skills live in `skills/` and are tracked in git. Third-party skills are listed in `skills.txt` (GitHub tree URLs) and are not tracked.
 
-1. Claude: ln -s ~/.config/agents/skills ~/.claude/skills
-2. Pi: loads `skills/` via the `skills` path in `pi/settings.json`
+Run `./sync-skills.sh` to install or update third-party skills and link all skills into `~/.claude/skills` and `~/.claude-work/skills`.
+Pi loads `skills/` directly via the `skills` path in `pi/settings.json`.
+
+For an own skill, add `!skills/<name>/` to `.gitignore`.

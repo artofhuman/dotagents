@@ -1,4 +1,6 @@
 .DS_Store
 __pycache__/
-skills/synced/
-skills/grill-me
+# Only own skills are tracked, third-party ones come from skills.txt
+skills/*
+!skills/why/
+!skills/review/
