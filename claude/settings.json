@@ -1,5 +1,33 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "mcp__youtrack__get_issue",
+      "mcp__youtrack__get_issue_attachments",
+      "mcp__youtrack__get_issue_comments",
+      "mcp__youtrack__get_issue_links",
+      "mcp__youtrack__get_issue_summary",
+      "mcp__youtrack__get_issue_tags",
+      "mcp__youtrack__get_issue_work_items",
+      "mcp__youtrack__get_project",
+      "mcp__youtrack__get_projects",
+      "mcp__youtrack__get_server_info",
+      "mcp__youtrack__search_issues"
+    ],
+    "deny": [
+      "mcp__youtrack__add_issue_tag",
+      "mcp__youtrack__remove_issue_tag",
+      "mcp__youtrack__create_issue",
+      "mcp__youtrack__update_issue",
+      "mcp__youtrack__delete_issue",
+      "mcp__youtrack__create_issue_comment",
+      "mcp__youtrack__update_issue_comment",
+      "mcp__youtrack__delete_issue_comment",
+      "mcp__youtrack__create_issue_work_item",
+      "mcp__youtrack__delete_issue_work_item",
+      "mcp__youtrack__delete_issue_attachment"
+    ]
+  },
   "model": "opus[1m]",
   "statusLine": {
     "type": "command",
@@ -20,6 +48,11 @@
   },
   "syntaxHighlightingDisabled": false,
   "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
   "tui": "default",
   "theme": "light",
   "editorMode": "normal",
