@@ -1,14 +1,14 @@
 {
   "lastChangelogVersion": "1.5.2",
   "theme": "light",
-  "defaultProvider": "kontur",
-  "defaultModel": "ultra",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-6.1-sol",
   "enabledModels": [
-    "kontur/ultra",
-    "kontur/pro-2026-12-01",
     "openai-codex/gpt-6.1-sol",
+    "kontur/ultra",
     "openai-codex/gpt-6-astra",
-    "openai-codex/gpt-6-luna"
+    "openai-codex/gpt-6-luna",
+    "kontur/pro-2026-12-01"
   ],
   "transport": "sse",
   "httpIdleTimeoutMs": 1800000,
