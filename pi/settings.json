@@ -5,5 +5,8 @@
   "defaultModel": "ultra",
   "skills": [
     "~/.config/agents/skills"
+  ],
+  "extensions": [
+    "~/.config/agents/pi/extensions"
   ]
 }

@@ -3,7 +3,7 @@
   "model": "opus[1m]",
   "statusLine": {
     "type": "command",
-    "command": "~/.config/agents/claude/statusline.sh"
+    "command": "~/.config/agents/statusline.sh"
   },
   "enabledPlugins": {
     "pyright-lsp@claude-plugins-official": true,

@@ -1,5 +1,6 @@
 #!/bin/sh
-# Status line script for Claude Code (settings.json -> statusLine.command).
+# Status line for Claude Code (statusLine.command) and pi (pi/extensions/statusline.ts).
+# Input: Claude Code statusline JSON on stdin.
 # Shows: model[effort] | directory | vcs change/branch | context usage | 5h limit.
 
 input=$(cat)
