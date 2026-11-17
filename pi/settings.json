@@ -10,6 +10,7 @@
     "openai-codex/gpt-6-luna",
     "kontur/pro-2026-12-01"
   ],
+  "defaultTools": ["+codemode"],
   "transport": "sse",
   "httpIdleTimeoutMs": 1800000,
   "retry": {
