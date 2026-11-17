@@ -1,12 +1,32 @@
 {
-  "lastChangelogVersion": "0.85.1",
+  "lastChangelogVersion": "1.5.2",
   "theme": "light",
   "defaultProvider": "kontur",
   "defaultModel": "ultra",
+  "enabledModels": [
+    "kontur/ultra",
+    "kontur/pro-2026-12-01",
+    "openai-codex/gpt-6.1-sol",
+    "openai-codex/gpt-6-astra",
+    "openai-codex/gpt-6-luna"
+  ],
+  "transport": "sse",
+  "httpIdleTimeoutMs": 1800000,
+  "retry": {
+    "provider": {
+      "timeoutMs": 3600000
+    }
+  },
   "skills": [
     "~/.config/agents/skills"
   ],
   "extensions": [
     "~/.config/agents/pi/extensions"
-  ]
+  ],
+  "tuiMode": "regular",
+  "outputPad": 1,
+  "modelThinkingLevels": {
+    "openai-codex/gpt-6.1-sol": "high"
+  },
+  "editorPaddingX": 0
 }

@@ -16,16 +16,17 @@ type Limit = { percent: number; resetsAt?: number };
 // 5h window from provider headers (Anthropic subscription, ChatGPT/Codex).
 function parseLimit(h: Record<string, string | undefined>): Limit | undefined {
 	const anth = h["anthropic-ratelimit-unified-5h-utilization"];
-	if (anth != null) {
+	if (anth != null && anth.trim() !== "" && Number.isFinite(Number(anth))) {
 		const reset = Number(h["anthropic-ratelimit-unified-5h-reset"]);
-		return { percent: Number(anth) * 100, resetsAt: reset > 0 ? reset : undefined };
+		return { percent: Number(anth) * 100, resetsAt: Number.isFinite(reset) && reset > 0 ? reset : undefined };
 	}
 	const codex = h["x-codex-primary-used-percent"];
-	if (codex != null) {
-		const after = Number(h["x-codex-primary-reset-after-seconds"]);
+	if (codex != null && codex.trim() !== "" && Number.isFinite(Number(codex))) {
+		const rawAfter = h["x-codex-primary-reset-after-seconds"];
+		const after = rawAfter != null && rawAfter.trim() !== "" ? Number(rawAfter) : NaN;
 		return {
 			percent: Number(codex),
-			resetsAt: Number.isFinite(after) ? Math.floor(Date.now() / 1000 + after) : undefined,
+			resetsAt: Number.isFinite(after) && after >= 0 ? Math.floor(Date.now() / 1000 + after) : undefined,
 		};
 	}
 	return undefined;
