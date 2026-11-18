@@ -1,15 +1,17 @@
 ---
 name: review
-description: "Full review of the changes since a fixed point (commit, branch, tag, or merge-base) in one merged report: Spec (does the code solve the originating task?), Correctness (bugs, via the built-in /code-review), and Standards (does the code follow this repo's documented coding standards?). Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
+description: "Full review of the changes since a fixed point (commit, branch, tag, or merge-base) in one merged report: Spec (does the code solve the originating task?), Correctness (bugs: Claude Code's built-in /code-review, or an own bug pass in other harnesses), and Standards (does the code follow this repo's documented coding standards?). Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to \"review since X\"."
 ---
 
 One review, one report, three axes:
 
 - **Spec**: does the diff solve the originating task, fully and without extra scope?
-- **Correctness**: bugs, found by the built-in `/code-review` skill.
+- **Correctness**: bugs. In Claude Code: the built-in `/code-review` skill. In other harnesses (Codex, pi, ...) it does not exist: do not invoke it; run the Bugs brief from step 5 instead.
 - **Standards**: does the code conform to this repo's documented coding standards?
 
-All three run in parallel in the background: Spec and Standards as sub-agents, `/code-review` as its own fork. Then they are merged into one report.
+All three run in parallel as sub-agents (`/code-review` as its own fork), then merge into one report. If the harness has no sub-agents, run the three briefs one after another in the main thread. Give each axis the same depth as a sub-agent would: read the changed files and their callers, not only the diff.
+
+No axis runs the test suite, linters, type checks, or anything else CI checks. Only the Bugs pass may run a throwaway repro script to confirm one specific finding that tests do not cover.
 
 Arguments: `/review [fixed-point] [level]`. `level` (`low`…`max`) is passed through to `/code-review`.
 
@@ -29,13 +31,13 @@ Find the task key in the branch name and commit messages (`NDS-1234`, `PROJ-56`,
 2. Tracker keys like `ABC-123` with a YouTrack MCP available: `get_issue`, `get_issue_comments`, and `get_issue_links` when the issue refers to linked issues for the actual requirements. Comments often change the requirements; read them all.
 3. GitHub / GitLab refs: `gh issue view` / `glab issue view`.
 4. A path the user passed, or a spec file under `docs/`, `specs/`, `.scratch/` matching the branch name.
-5. Nothing found: ask the user. If there is no task, skip the Spec sub-agent and say so in the report.
+5. Nothing found, or the text is not reachable: do not block. Skip Spec, run the other axes, and say in the report that Spec was skipped and the user can send the task text.
 
 Fetch the task here, in the main thread, and paste its text into the Spec prompt: sub-agents may lack the tracker tools.
 
 ### 3. Collect the standards
 
-- Repo docs on how to write code: `CLAUDE.md`, `AGENTS.md`, `CLAUDE.local.md` (and files they `@`-include), `CODING_STANDARDS.md`, `CONTRIBUTING.md`.
+- Every repo file that documents how code should be written: at least `CLAUDE.md`, `AGENTS.md`, `CLAUDE.local.md` (and files they `@`-include), `CODING_STANDARDS.md`, `CONTRIBUTING.md`; also search for others (`docs/`, nested `AGENTS.md` / `CLAUDE.md` in the changed directories).
 - The `feedback` memories from this session's auto-memory directory (see `MEMORY.md`). Sub-agents do not see memory, so pass their paths or contents explicitly.
 - The **smell baseline** below.
 
@@ -61,31 +63,34 @@ Each smell reads *what it is* → *how to fix*:
 
 ### 4. Start Spec and Standards in the background
 
-Spawn both with the Agent tool in one message, so they run in parallel.
+Spawn both with the Agent tool in one message, so they run in parallel. Use fresh-context sub-agents, not forks: each axis must see only its own brief, so one does not bias the other.
 
-**Spec prompt**: the diff command, commit list, the full task text with comments, and the brief: "Report: (a) requirements the task asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the task line for each finding and give `file:line`. Add a one-line fix to each finding. End with a verdict: solves the task — yes / partially / no. Under 400 words."
+**Spec prompt**: the diff command, commit list, the full task text with comments, and the brief: "Report: (a) requirements the task asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Do not run code. Quote the task line for each finding and give `file:line`. Add a one-line fix to each finding. End with a verdict: solves the task — yes / partially / no. Under 400 words."
 
-**Standards prompt**: the diff command, commit list, the standards files and memory paths from step 3, the smell baseline pasted in full, and the brief: "Report (a) every place the diff violates a documented standard: cite the file and the rule; (b) any baseline smell: name it and quote the hunk. Give `file:line`. Add a one-line fix to each finding. Mark documented-standard breaches as hard, smells as judgement calls. Skip anything tooling enforces. Under 400 words."
+**Standards prompt**: the diff command, commit list, the standards files and memory paths from step 3, the smell baseline pasted in full, and the brief: "Report (a) every place the diff violates a documented standard: cite the file and the rule; (b) any baseline smell: name it and quote the hunk. Give `file:line`. Add a one-line fix to each finding. Mark documented-standard breaches as hard, smells as judgement calls. Skip anything tooling enforces. Do not run code. Under 400 words."
 
-### 5. Start /code-review
+### 5. Start the Bugs pass
 
-In the same message as the sub-agents, invoke the `code-review` skill via the Skill tool. Args: the current branch name as the target, plus `level` if the user gave one. Never pass `--fix` or `--comment`: the user decides on fixes after reading the merged report.
+**Outside Claude Code**: start a third sub-agent (or run inline) with the diff command, commit list, the task text, and the brief: "Find bugs the diff introduces. Read each changed function and its callers. Check: parity with the code it replaces (headers, status codes, filters, types the old code checked); async and ORM pitfalls (lazy loads, sessions or connections held across a stream); error paths and edge inputs (missing values, escaping in URLs and headers, non-default branches the fixtures never hit); access control (does the check match the one the list or UI uses?); resource lifetime. For each finding give `file:line`, a concrete failure scenario, and CONFIRMED (you traced it in the code) or PLAUSIBLE. Do not run tests or linters; you may write a throwaway repro script under `/tmp` to confirm one finding that tests do not cover. Also list what you checked and rejected. No style findings."
+
+**In Claude Code**: in the same message as the sub-agents, invoke the `code-review` skill via the Skill tool. Args: the current branch name as the target, plus `level` if the user gave one. Never pass `--fix` or `--comment`: the user decides on fixes after reading the merged report.
 
 It runs as a background fork and returns its findings as text in a task notification. Without `level` it reuses the last one the user typed; mention the level in the report.
 
 ### 6. Merge
 
-Wait for all three notifications (Spec, Standards, `/code-review`); do not poll. Then write one report in the user's language, sections in this order:
+Wait for all three (Spec, Standards, Bugs); do not poll. Merging is not a new review: do not re-read or re-verify the code, and do not drop findings. Remove only duplicates. If a finding is clearly wrong, keep it under "Rejected" with a one-line reason. Then write one report in the user's language, sections in this order:
 
 1. **Task**: the task key and title, the Spec verdict, then missing / partial, scope creep, wrong implementation.
-2. **Bugs**: the `/code-review` findings, most severe first, with `file:line`, the failure scenario in one line, and the verdict (CONFIRMED / PLAUSIBLE) when present.
+2. **Bugs**: the Bugs findings, most severe first, with `file:line`, the failure scenario in one line, and the verdict (CONFIRMED / PLAUSIBLE) when present.
 3. **Standards**: hard violations first, then smells.
+4. **Checked and rejected**: the merged "checked / rejected" lists from the axes, one line each, deduplicated.
 
 Rules:
 
 - Keep findings inside their section; do not rerank across sections. A change can pass one axis and fail another, and mixing them lets one mask the other.
 - Deduplicate: when two sections report the same root issue at the same place, keep it once in the most fitting section and add "(also: Standards)" or similar.
-- Every finding ends with a short **Fix:** line: one concrete action, what to change and where. `/code-review` findings come without one; write it yourself from the code. If no fix is clear, name the decision that is needed instead.
+- Every finding ends with a short **Fix:** line: one concrete action, what to change and where. Bugs findings may come without one; write it yourself, reading only the lines at that `file:line`. If no fix is clear, name the decision that is needed instead.
 - Finding plus fix, two lines where possible; drop sub-agent preambles.
 - An axis that was skipped or failed (no task, sub-agent error) gets one line saying so, not silence.
 

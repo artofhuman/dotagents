@@ -5,6 +5,9 @@
 # Pi agent
 
 1. ln -s ~/.config/agents/pi/settings.json ~/.pi/agent/settings.json
+2. ln -s ~/.config/agents/pi/agents ~/.pi/agent/agents
+
+Sub-agents: `pi/extensions/subagent` (copied from the pi examples) adds the `subagent` tool. Agent definitions live in `pi/agents/*.md`; without `model:` a sub-agent inherits the parent's model and thinking level.
 
 # Claude
 
