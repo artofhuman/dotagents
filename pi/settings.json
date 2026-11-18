@@ -10,7 +10,9 @@
     "openai-codex/gpt-6-luna",
     "kontur/pro-2026-12-01"
   ],
-  "defaultTools": ["+codemode"],
+  "defaultTools": [
+    "+codemode"
+  ],
   "transport": "sse",
   "httpIdleTimeoutMs": 1800000,
   "retry": {
@@ -24,10 +26,16 @@
   "extensions": [
     "~/.config/agents/pi/extensions"
   ],
+  "packages": [
+    "npm:pi-compact-tools"
+  ],
   "tuiMode": "regular",
   "outputPad": 1,
   "modelThinkingLevels": {
     "openai-codex/gpt-6.2-sol": "high"
   },
-  "editorPaddingX": 0
+  "editorPaddingX": 0,
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-compact-tools\",\"scope\":\"user\"}": "0.18.0"
+  }
 }
